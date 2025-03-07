@@ -1,17 +1,21 @@
 import mysql.connector
 import pandas as pd
 import streamlit as st
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 class DatabaseConnection:
-    def __init__(self, host, user, password, database):
-        self.host = host
-        self.user = user
-        self.password = password
-        self.database = database
+    def __init__(self):
+        self.host = "localhost"
+        self.user = "root"
+        self.password = "MySQL!Secure#1234"
+        self.database = "placement_eligibility"
         self.conn = None
         self.cursor = None
 
     def open_connection(self):
+        logging.info("Opening database connection...")
         self.conn = mysql.connector.connect(
             host=self.host,
             user=self.user,
@@ -23,8 +27,10 @@ class DatabaseConnection:
     def close_connection(self):
         if self.conn:
             self.conn.close()
+            logging.info("Database connection closed.")
 
     def fetch_data(self, query, params=()):
+        logging.info(f"Executing query: {query} with params: {params}")
         self.open_connection()
         self.cursor.execute(query, params)
         result = self.cursor.fetchall()
@@ -35,17 +41,14 @@ class StreamlitApp:
     def __init__(self, db_connection):
         self.db_connection = db_connection
 
-    # def display_all_students(self):
-    #     query = "SELECT * FROM students LIMIT 500;"
-    #     df = self.db_connection.fetch_data(query)
-    #     st.subheader("All Student Data")
-    #     st.write(df)
-    
     def display_all_students(self):
-        query = "SELECT name, age, city, email, phone, enrollment_year, city FROM students LIMIT 500;"  
+        query = "SELECT name, age, city, email, phone, enrollment_year FROM students LIMIT 500;"
         df = self.db_connection.fetch_data(query)
         st.subheader("All Student Data")
-        st.dataframe(df, height=500)
+        if not df.empty:
+            st.dataframe(df, height=500)
+        else:
+            st.warning("No student data found.")
 
     def filter_eligible_students(self, problems_min, skills_min, age_min, city_filter, placement_status_filter):
         query_eligible = '''
@@ -81,8 +84,9 @@ class StreamlitApp:
         '''
         student_details = self.db_connection.fetch_data(student_query, params=(student_id,))
         if not student_details.empty:
-            st.subheader(f"Details for {student_details['name'].values[0]}")
-            st.write(student_details)
+            student = student_details.iloc[0]  # Get the first row (only one student expected)
+            st.subheader(f"Details for {student['name']}")
+            st.write(student)
         else:
             st.warning(f"No details found for student ID {student_id}.")
 
@@ -95,7 +99,10 @@ class StreamlitApp:
         '''
         avg_programming_data = self.db_connection.fetch_data(query_avg_programming)
         st.subheader("Average Programming Performance per Batch")
-        st.write(avg_programming_data)
+        if not avg_programming_data.empty:
+            st.write(avg_programming_data)
+        else:
+            st.warning("No data available for programming performance.")
 
     def display_top_5_students_for_placement(self):
         query_top_students = '''
@@ -110,7 +117,10 @@ class StreamlitApp:
         '''
         top_students = self.db_connection.fetch_data(query_top_students)
         st.subheader("Top 5 Students Ready for Placement")
-        st.write(top_students)
+        if not top_students.empty:
+            st.write(top_students)
+        else:
+            st.warning("No data available for top students.")
 
     def display_soft_skills_distribution(self):
         query_soft_skills = '''
@@ -121,7 +131,10 @@ class StreamlitApp:
         '''
         soft_skills_distribution = self.db_connection.fetch_data(query_soft_skills)
         st.subheader("Distribution of Soft Skills Scores")
-        st.write(soft_skills_distribution)
+        if not soft_skills_distribution.empty:
+            st.write(soft_skills_distribution)
+        else:
+            st.warning("No soft skills data available.")
 
     def display_avg_placement_package_per_batch(self):
         query_avg_package = '''
@@ -132,7 +145,10 @@ class StreamlitApp:
         '''
         avg_package_data = self.db_connection.fetch_data(query_avg_package)
         st.subheader("Average Placement Package per Batch")
-        st.write(avg_package_data)
+        if not avg_package_data.empty:
+            st.write(avg_package_data)
+        else:
+            st.warning("No placement package data available.")
 
     def display_count_of_students_by_placement_status(self):
         query_placement_status = '''
@@ -143,7 +159,10 @@ class StreamlitApp:
         '''
         placement_status_data = self.db_connection.fetch_data(query_placement_status)
         st.subheader("Count of Students by Placement Status")
-        st.write(placement_status_data)
+        if not placement_status_data.empty:
+            st.write(placement_status_data)
+        else:
+            st.warning("No placement status data available.")
 
     def display_top_10_students_by_communication(self):
         query_top_communication = '''
@@ -155,7 +174,10 @@ class StreamlitApp:
         '''
         top_communication = self.db_connection.fetch_data(query_top_communication)
         st.subheader("Top 10 Students by Soft Skills Communication")
-        st.write(top_communication)
+        if not top_communication.empty:
+            st.write(top_communication)
+        else:
+            st.warning("No data available for top communication students.")
 
     def display_students_with_more_than_50_problems(self):
         query_more_than_50 = '''
@@ -166,7 +188,10 @@ class StreamlitApp:
         '''
         students_more_than_50 = self.db_connection.fetch_data(query_more_than_50)
         st.subheader("Students Who Solved More Than 50 Problems")
-        st.write(students_more_than_50)
+        if not students_more_than_50.empty:
+            st.write(students_more_than_50)
+        else:
+            st.warning("No students with more than 50 problems solved.")
 
     def display_avg_age_by_placement_status(self):
         query_avg_age = '''
@@ -177,7 +202,10 @@ class StreamlitApp:
         '''
         avg_age_data = self.db_connection.fetch_data(query_avg_age)
         st.subheader("Average Age by Placement Status")
-        st.write(avg_age_data)
+        if not avg_age_data.empty:
+            st.write(avg_age_data)
+        else:
+            st.warning("No data available for average age by placement status.")
 
     def display_students_by_city(self):
         query_by_city = '''
@@ -188,15 +216,14 @@ class StreamlitApp:
         '''
         students_by_city = self.db_connection.fetch_data(query_by_city)
         st.subheader("Number of Students by City")
-        st.write(students_by_city)
+        if not students_by_city.empty:
+            st.write(students_by_city)
+        else:
+            st.warning("No data available for students by city.")
 
+# Main function to run the Streamlit app
 def main():
-    db_connection = DatabaseConnection(
-        host="localhost",
-        user="root",
-        password="MySQL!Secure#1234",
-        database="placement_eligibility"
-    )
+    db_connection = DatabaseConnection()
     
     app = StreamlitApp(db_connection)
 
