@@ -5,7 +5,7 @@ fake = faker.Faker()
 
 try:
     conn = mysql.connector.connect(
-        host="localhost",
+        host="127.0.0.1",
         user="root",
         password="MySQL!Secure#1234",
         database="placement_eligibility"
