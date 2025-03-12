@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 
 class DatabaseConnection:
     def __init__(self):
-        self.host = "localhost"
+        self.host = "127.0.0.1"
         self.user = "root"
         self.password = "MySQL!Secure#1234"
         self.database = "placement_eligibility"
