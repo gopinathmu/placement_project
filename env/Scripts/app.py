@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO)
 
 class DatabaseConnection:
     def __init__(self):
-        self.host = "127.0.0.1"
+        self.host = "localhost"
         self.user = "root"
         self.password = "MySQL!Secure#1234"
         self.database = "placement_eligibility"
@@ -221,7 +221,6 @@ class StreamlitApp:
         else:
             st.warning("No data available for students by city.")
 
-# Main function to run the Streamlit app
 def main():
     db_connection = DatabaseConnection()
     
